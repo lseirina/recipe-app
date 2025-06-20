@@ -16,12 +16,6 @@ RUN python -m venv /py && \
     if [ $DEV=true ]; \
         then /py/bin/pip install -r /tmp/requirements.dev.txt ; \
     fi && \
-    rm -rf /tmp && \
-    adduser \
-        --disabled-password \
-        --no-create-home \
-        django-user
-
+    rm -rf /tmp
+    
 ENV PATH="/py/bin:$PATH"
-
-USER django-user
