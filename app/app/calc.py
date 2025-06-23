@@ -2,6 +2,6 @@
 calclator function
 """
 
-def sdd(x, y):
+def add(x, y):
     """Add two numbers"""
     return x + y
