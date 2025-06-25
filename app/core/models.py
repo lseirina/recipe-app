@@ -9,6 +9,17 @@ from django.contrib.auth.models import (
 )
 
 
+class UserManager(BaseUserManager):
+    """User manager."""
+    def create_user(self, email, password=None, **extra_fields):
+        """Create user"""
+        user = self.model(email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+
+        return user
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     """User in the system."""
     email = models.EmailField(max_length=255, unique=True)
