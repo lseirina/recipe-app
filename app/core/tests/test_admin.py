@@ -11,7 +11,7 @@ class AdminSiteTests(TestCase):
     
     def setUp(self):
         self.client = Client()
-        self.admin_user = get_user_model().objects.create_super_user(
+        self.admin_user = get_user_model().objects.create_superuser(
             email='admin@example.com',
             password='test123',
         )
@@ -29,4 +29,10 @@ class AdminSiteTests(TestCase):
         
         self.assertContains(res, self.user.name)
         self.assertContains(res, self.user.email)
+
+    def test_edit_user_page(self):
+        """Test user page works."""
+        url = reverse('admin:core_change', args=[self.user.id])
+        res = self.client.get(url)
         
+        self.assertEqual(res.status_code, 200)
