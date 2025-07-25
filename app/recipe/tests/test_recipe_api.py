@@ -150,3 +150,12 @@ class PrivateRecipeTests(TestCase):
         for k, v in payload.items():
             self.assertequal(getattr(recipe, k), v)
         self.assertEqual(recipe.user, self.user)
+
+    def test_delete_recipe(self):
+        """Test deleting recipe."""
+        recipe = create_recipe(user=self.user)
+        url = detail_url(recipe.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(recipe.filter(res.id).exists())
