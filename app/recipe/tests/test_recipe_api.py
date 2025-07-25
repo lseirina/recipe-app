@@ -115,7 +115,7 @@ class PrivateRecipeTests(TestCase):
             self.assertEqual(getattr(recipe, k), v)
         self.assertEqual(recipe.user, self.user)
 
-    def test_partial_update_test(self):
+    def test_partial_update(self):
         """Test partial update is successful."""
         original_price = Decimal('2.34')
         recipe = create_recipe(
@@ -128,7 +128,25 @@ class PrivateRecipeTests(TestCase):
         res = self.client.patch(url, payload)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        Recipe.objects.refresh_db
+        recipe.refresh_from_db()
         self.assertEqual(recipe.title, payload['title'])
         self.assertEqual(recipe.price, original_price)
         self.assertequal(recipe.user, self.user)
+        
+    def test_full_update(self):
+        """Test full update of recipe."""
+        recipe = create_recipe(user=self.user)
+        payload = { 
+            'title': 'New Title',
+            'time_minutes': 14,
+            'price': Decimal('2.45'),
+            'description': 'New Sample description',
+        }
+        url = detail_url(recipe.id)
+        res = self.client.put(url, payload)
+
+        self.assertEqualres.status(res.status_code, status.HTTP_200_OK)
+        recipe.refresh_from_db()
+        for k, v in payload.items():
+            self.assertequal(getattr(recipe, k), v)
+        self.assertEqual(recipe.user, self.user)
