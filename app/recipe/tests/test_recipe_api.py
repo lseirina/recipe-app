@@ -51,14 +51,16 @@ class PublicRecipeTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
+def create_user(**params):
+    """"Create and return user."""
+    return get_user_model().objects.create_user(**params)
+
+
 class PrivateRecipeTests(TestCase):
     """Tests authenticated API requests"""
     def setUp(self):
         self.client = APIClient()
-        self.user = get_user_model().objects.create_user(
-            'test@example.com',
-            'testpass123',
-        )
+        self.user = create_user('test@example.com', 'testpass123',)
         self.client.force_authenticate(self.user)
 
     def test_retrieve_recipes(self):
@@ -75,7 +77,7 @@ class PrivateRecipeTests(TestCase):
 
     def test_recipe_limited_to_user(self):
         """Test recipes is limited to authenticated user."""
-        other_user = get_user_model().objects.create_user(
+        other_user = create_user(
             'other@example.com',
             'pass2345',
         )
@@ -106,9 +108,27 @@ class PrivateRecipeTests(TestCase):
             'price': Decimal('4.65'),
         }
         res = self.client.post(RECIPES_URL, payload)
-        
+
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         recipe = Recipe.objects.get(id=res.data['id'])
         for k, v in payload.items():
             self.assertEqual(getattr(recipe, k), v)
         self.assertEqual(recipe.user, self.user)
+
+    def test_partial_update_test(self):
+        """Test partial update is successful."""
+        original_price = Decimal('2.34')
+        recipe = create_recipe(
+            user=self.user,
+            title='Sample Title',
+            price=original_price,
+        )
+        payload = {'title': 'New Title'}
+        url = detail_url(recipe.id)
+        res = self.client.patch(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        Recipe.objects.refresh_db
+        self.assertEqual(recipe.title, payload['title'])
+        self.assertEqual(recipe.price, original_price)
+        self.assertequal(recipe.user, self.user)
