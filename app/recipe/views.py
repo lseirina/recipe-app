@@ -9,13 +9,13 @@ from core.models import Recipe
 from recipe.serializers import RecipeSerializer
 
 
-class RecipeViewSet(viewsets.ModelsViewSet):
+class RecipeViewSet(viewsets.ModelViewSet):
     """Views for manage recipes."""
     serializer_class = RecipeSerializer
     queryset = Recipe.objects.all()
     permission_classes = [IsAuthenticated]
-    autentication_classes = [TokenAuthentication]
+    authentication_classes = [TokenAuthentication]
 
     def get_queryset(self):
         """Retrieve recipes for authenticated user"""
-        return self.queryset.filter(user=self.request.user.order_by('-id'))
+        return self.queryset.filter(user=self.request.user).order_by('-id')
