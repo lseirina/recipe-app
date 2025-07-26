@@ -9,6 +9,14 @@ from django.contrib.auth import get_user_model
 from core import models
 
 
+def create_user(email='test@example.com', password='tstspass123'):
+    """Create and return user"""
+    return get_user_model().objects.create_user(
+        email=email,
+        password=password
+    )
+
+
 class ModelTests(TestCase):
     """Tests models."""
 
@@ -71,13 +79,10 @@ class ModelTests(TestCase):
 
     def test_create_tag(self):
         """Test creating tag is successfull."""
-        user = get_user_model().objects.create_user(
-            email='test@example.com',
-            password='tstspass123'
-        )
+        user = create_user()
         tag = models.Tag.objects.create(
             user=user,
             name='Tag name'
         )
-        
+
         self.assertEqual(str(tag), tag.name)
