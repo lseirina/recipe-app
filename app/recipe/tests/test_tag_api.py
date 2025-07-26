@@ -38,7 +38,7 @@ class PrivateTagsTests(TestCase):
         self.user = create_user()
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
-        
+
     def test_retrieve_tags(self):
         """Test retrieving tags successfull."""
         Tag.objects.create(
@@ -50,8 +50,21 @@ class PrivateTagsTests(TestCase):
             name='Desert'
         )
         res = self.client.get(TAGS_URL)
-        tags = Tag.objects.all()
+        tags = Tag.objects.all().order_by('-name')
         serializer = TagSerializer(tags, many=True)
-        
+
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
+
+    def test_tag_limited_to_user(self):
+        """Test tag is limited to authenticated user."""
+        user2 = create_user(email='user2@ec=xample.com', password='pass123')
+        Tag.objects.create(user=user2, name='Fruity')
+        tag = Tag.objects.create(user=self.user, name='Desert')
+
+        res = self.client.get(TAGS_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data), 1)
+        self.assertEqual(res.data[0]['name'], tag.name)
+        self.assertEqual(res.data[0]['id'], tag.id)
