@@ -60,7 +60,7 @@ class PrivateRecipeTests(TestCase):
     """Tests authenticated API requests"""
     def setUp(self):
         self.client = APIClient()
-        self.user = create_user('test@example.com', 'testpass123',)
+        self.user = create_user(email='test@example.com', password='testpass123')
         self.client.force_authenticate(self.user)
 
     def test_retrieve_recipes(self):
@@ -78,8 +78,8 @@ class PrivateRecipeTests(TestCase):
     def test_recipe_limited_to_user(self):
         """Test recipes is limited to authenticated user."""
         other_user = create_user(
-            'other@example.com',
-            'pass2345',
+            email='other@example.com',
+            password='pass2345',
         )
         create_recipe(other_user)
         create_recipe(self.user)
@@ -131,7 +131,7 @@ class PrivateRecipeTests(TestCase):
         recipe.refresh_from_db()
         self.assertEqual(recipe.title, payload['title'])
         self.assertEqual(recipe.price, original_price)
-        self.assertequal(recipe.user, self.user)
+        self.assertEqual(recipe.user, self.user)
         
     def test_full_update(self):
         """Test full update of recipe."""
@@ -145,10 +145,10 @@ class PrivateRecipeTests(TestCase):
         url = detail_url(recipe.id)
         res = self.client.put(url, payload)
 
-        self.assertEqualres.status(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
         recipe.refresh_from_db()
         for k, v in payload.items():
-            self.assertequal(getattr(recipe, k), v)
+            self.assertEqual(getattr(recipe, k), v)
         self.assertEqual(recipe.user, self.user)
 
     def test_delete_recipe(self):
@@ -158,4 +158,4 @@ class PrivateRecipeTests(TestCase):
         res = self.client.delete(url)
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(recipe.filter(res.id).exists())
+        self.assertFalse(Recipe.objects.filter(id=recipe.id).exists())
