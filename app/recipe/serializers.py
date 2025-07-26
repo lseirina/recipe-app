@@ -24,7 +24,7 @@ class RecipeDetailSerializer(RecipeSerializer):
         fields = RecipeSerializer.Meta.fields + ['description']
 
 
-class tagserializer(serializers.ModelSerializer):
+class TagSerializer(serializers.ModelSerializer):
     """Serializer for tags."""
     model = Tag
     fields = ['id', 'name']
