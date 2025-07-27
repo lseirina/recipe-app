@@ -10,7 +10,11 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from core.models import Recipe
+from core.models import (
+    Recipe,
+    Tag
+)
+
 from recipe.serializers import (
     RecipeSerializer,
     RecipeDetailSerializer,
@@ -159,3 +163,25 @@ class PrivateRecipeTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Recipe.objects.filter(id=recipe.id).exists())
+        
+    def test_create_recipe_with_new_tag(self):
+        """Test createting recipe with a new tag."""
+        payload = {
+            'title': "Sample Recipe",
+            'time_minutes': 22,
+            'price': Decimal('45.5'),
+            'tags': [{'name': 'Breakfast'}, {'name': 'Dinner'}]
+        }
+        res = self.client.post(RECIPES_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipes = Recipe.objects.filter(user=self.user)
+        self.assertEqual(recipes.count(), 1)
+        recipe = recipes[0]
+        self.assertEqual(recipe.tags.count(), 2)
+        for tag in payload['tags']:
+            exists = Recipe.filter(
+                name=tag['name'],
+                user=self.user,
+            )
+            self.assertFalse(exists)
