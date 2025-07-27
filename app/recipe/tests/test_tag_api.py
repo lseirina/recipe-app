@@ -14,7 +14,7 @@ TAGS_URL = reverse('recipe:tag-list')
 
 def detail_url(tag_id):
     """Create and return detail url for tag."""
-    return reverse('recipe:tag-detail', args=tag_id)
+    return reverse('recipe:tag-detail', args=[tag_id])
 
 
 def create_user(email='test@example.com', password='testpass123'):
@@ -82,4 +82,15 @@ class PrivateTagsTests(TestCase):
 
         res = self.client.patch(url, payload)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        tag.refresh_from_db()
         self.assertEqual(tag.name, payload['name'])
+
+    def test_delete_tag(self):
+        """"Test deleting tag."""
+        tag = Tag.objects.create(user=self.user, name='Vegan')
+        url = detail_url(tag.id)
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        tags = Tag.objects.filter(user=self.user)
+        self.assertFalse(tags.exists())
