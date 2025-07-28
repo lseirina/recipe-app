@@ -195,11 +195,11 @@ class PrivateRecipeTests(TestCase):
             'tags': [{'name': 'Indian'}, {'name': 'Dessert'}]
         }
         res = self.client.post(RECIPES_URL, payload, format='json')
-        
+
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         recipes = Recipe.objects.filter(user=self.user)
         self.assertEqual(recipes.count(), 1)
-        recipe =recipes[0]
+        recipe = recipes[0]
         self.assertequal(recipe.tags.count(), 2)
         self.assertIn(indian_tag, recipe.tags)
         for tag in payload['tags']:
