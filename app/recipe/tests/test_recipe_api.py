@@ -103,7 +103,7 @@ class PrivateRecipeTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
-        
+
     def test_create_recipe(self):
         """test create recipe successfull."""
         payload = {
@@ -211,7 +211,7 @@ class PrivateRecipeTests(TestCase):
 
     def test_create_tag_on_update(self):
         """Test create tag on update the recipe."""
-        recipe = Recipe.objects.create(user=self.user)
+        recipe = create_recipe(user=self.user)
         payload = {'tags': [{'name': 'Lunch'}]}
         url = detail_url(recipe.id)
         res = self.client.patch(url, payload, format='json')
@@ -222,7 +222,7 @@ class PrivateRecipeTests(TestCase):
 
     def test_update_recipe_assign_tag(self):
         """Test assign an existing tag when updating recipe."""
-        recipe = Recipe.objects.create(user=self.user)
+        recipe = create_recipe(user=self.user)
         tag_breakfast = Tag.objects.create(user=self.user, name='Breakfast')
         recipe.tags.add(tag_breakfast)
 
@@ -237,11 +237,11 @@ class PrivateRecipeTests(TestCase):
 
     def test_clear_recipe_tag(self):
         """Test clearing a recipe tag."""
-        recipe = Recipe.objects.create(user=self.user)
+        recipe = create_recipe(user=self.user)
         tag = Tag.objects.create(user=self.user, name='Dessert')
         recipe.tags.add(tag)
 
-        payload = {'tags': [{'name': []}]}
+        payload = {'tags': []}
         url = detail_url(recipe.id)
         res = self.client.patch(url, payload, format='json')
         self.assertEqual(res.status_code, status.HTTP_200_OK)

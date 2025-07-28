@@ -24,7 +24,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ['id', 'title', 'time_minutes', 'price', 'tags']
-        read_only_field = ['id']
+        read_only_fields = ['id']
 
     def _get_or_create_tag(self, recipe, tags):
         """Handling getting or creating tag as needed."""
@@ -49,7 +49,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags', None)
         if tags is not None:
             instance.tags.clear()
-            self._get_or_create(instance, tags)
+            self._get_or_create_tag(instance, tags)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
