@@ -279,17 +279,28 @@ class PrivateRecipeTests(TestCase):
             'price': Decimal('250.00'),
             'ingredients': [{'name': 'Salt'}, {'name': 'Egg'}]
         }
-        
+
         res = self.client.post(RECIPES_URL, payload, format='json')
-        
+
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         recipes = Recipe.objects.filter(user=self.user)
         self.assertEqual(recipes.count(), 1)
         recipe = recipes[0]
         self.assertEqual(recipe.ingredients.count(), 2)
         for ingredient in payload['ingredients']:
-            exists = recipe.filter(
+            exists = recipe.ingredients.filter(
                 user=self.user,
                 name=ingredient['name']
             ).exists()
             self.assertTrue(exists)
+
+    def test_create_ingredient_on_update(self):
+        """"Test creating ingredient when updating the recipe."""
+        recipe = create_recipe(user=self.user)
+        payload = {'name': 'Chili'}
+        url = detail_url(recipe.id)
+        res = self.client.patch(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        new_ingredient = Ingredient.objects.filter(name='Chili')
+        self.assertIn(new_ingredient, recipe.ingredients.all())
