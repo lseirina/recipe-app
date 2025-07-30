@@ -325,3 +325,16 @@ class PrivateRecipeTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn(ingredient2, recipe.ingredients.all())
         self.assertNotIn(ingredient1, recipe.ingredients.all())
+
+    def test_clear_ingredient(self):
+        """Test clearing ingredient in recipe."""
+        recipe = create_recipe(user=self.user)
+        ingredient = Ingredient.objects.create(user=self.user, name='Salt')
+        recipe.ingredients.add(ingredient)
+
+        url = detail_url(recipe.id)
+        payload = {'name': []}
+        res = self.client.patch(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(recipe.ingredient.count(), 0)
