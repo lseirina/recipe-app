@@ -12,7 +12,8 @@ from rest_framework import status
 
 from core.models import (
     Recipe,
-    Tag
+    Tag,
+    Ingredient
 )
 
 from recipe.serializers import (
@@ -246,3 +247,25 @@ class PrivateRecipeTests(TestCase):
         res = self.client.patch(url, payload, format='json')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(recipe.tags.count(), 0)
+
+    def test_create_recipe_with_new_ingredient(self):
+        """Test create recipe with a new ingredient."""
+        payload = {
+            'title': 'Pie',
+            'time_minutes': 50,
+            'price': Decimal(300.55),
+            'ingredients': [{'name': 'Flour'}, {'name': 'Sugar'}]
+        }
+        res = self.client.post(RECIPES_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipes = Recipe.objects.filter(user=self.user)
+        self.assertEqual(recipes.count(), 1)
+        recipe = recipes[0]
+        self.assertEqual(recipe.ingredient.count(), 2)
+        for ingredient in payload['ingredients']:
+            exists = recipe.ingredients.filter(
+                user=self.user,
+                name=ingredient['name']
+            ).exists()
+            self.assertTrue(exists)
