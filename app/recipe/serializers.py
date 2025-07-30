@@ -18,7 +18,7 @@ class TagSerializer(serializers.ModelSerializer):
         read_only_filelds = ['id']
         
         
-class IngredientSerializer(serializers.Modelserializer):
+class IngredientSerializer(serializers.ModelSerializer):
     """Serializer for ingredient."""
     class Meta:
         model = Ingredient
@@ -29,7 +29,7 @@ class IngredientSerializer(serializers.Modelserializer):
 class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for recipes."""
     tags = TagSerializer(many=True, required=False)
-    ingredient = IngredientSerializer(many=True, required=False)
+    ingredients = IngredientSerializer(many=True, required=False)
 
     class Meta:
         model = Recipe

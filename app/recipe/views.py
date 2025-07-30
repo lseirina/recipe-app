@@ -54,12 +54,12 @@ class TagViewSet(mixins.DestroyModelMixin,
         return self.queryset.filter(user=self.request.user).order_by('-name')
 
 
-class IngredientViewSEt(mixins.DestriyModelMixin,
+class IngredientViewSet(mixins.DestroyModelMixin,
                         mixins.UpdateModelMixin,
                         mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     """Manage ingredient in the database"""
-    serilizer_class = serializers.IngredientSerializer
+    serializer_class = serializers.IngredientSerializer
     queryset = Ingredient.objects.all()
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -67,4 +67,3 @@ class IngredientViewSEt(mixins.DestriyModelMixin,
     def get_queryset(self):
         """Return ingredients for authenticated user."""
         return self.queryset.filter(user=self.request.user).order_by('-name')
-

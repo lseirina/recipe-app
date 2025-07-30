@@ -1,16 +1,21 @@
 """"Tests for ingredient API"""
 from django.contrib.auth import get_user_model
-from django.db import TestCase
+from django.test import TestCase
 from django.urls import reverse
 
 from rest_framework import status
 from rest_framework.test import APIClient
 
 from core.models import Ingredient
-from recipe.serializer import IngredientSerializer
+from recipe.serializers import IngredientSerializer
 
 
 INGREDIENTS_URL = reverse('recipe:ingredient-list')
+
+
+def detail_url(ingredient_id):
+    """Return detail_utl"""
+    return reverse('recipe:ingredient-detail', args=ingredient_id)
 
 
 def create_user(email='test@example.com', password='testpass123'):
@@ -27,9 +32,9 @@ class PublicIngredientApiTest(TestCase):
         """Test requireing auth for retrieving ingredient"""
         res = self.client.get(INGREDIENTS_URL)
 
-        self.assertEqual(res.status_code, status.HTTP_403_UNAUTHORIZED)
-        
-        
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
 class PrivateIngredientApiTest(TestCase):
     """Tests for authorized user"""
 
@@ -44,7 +49,7 @@ class PrivateIngredientApiTest(TestCase):
         Ingredient.objects.create(user=self.user, name='Flour')
 
         res = self.client.get(INGREDIENTS_URL)
-        ingredients = Ingredient.objects.all().order_by('name')
+        ingredients = Ingredient.objects.all().order_by('-name')
         serializer = IngredientSerializer(ingredients, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
@@ -59,4 +64,15 @@ class PrivateIngredientApiTest(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 1)
-        self.assertEqual(res.data[0]['ingredient'], ingredient['name'])
+        self.assertEqual(res.data[0]['name'], ingredient.name)
+
+    def test_upgrade_ingredient(self):
+        """Test updating ingredient."""
+        ingredient = Ingredient.objects.create(user=self.user, name='Egg')
+        payload = {'name': 'Flour'}
+        url = detail_url(ingredient.id)
+
+        res = self.client.patch(url, payload)
+
+        self.assertEqaul(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(ingredient.name, payload['name'])
