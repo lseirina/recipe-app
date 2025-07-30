@@ -304,3 +304,24 @@ class PrivateRecipeTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         new_ingredient = Ingredient.objects.filter(name='Chili')
         self.assertIn(new_ingredient, recipe.ingredients.all())
+
+    def test_assing_existing_ingredient_on_update(self):
+        """Test assigning existing ingredfients on updating recipe."""
+        ingredient1 = Ingredient.objects.create(
+            user=self.user,
+            name='Potato',
+        )
+        recipe = create_recipe(user=self.user)
+        recipe.ingredients.add(ingredient1)
+
+        ingredient2 = Ingredient.objects.create(
+            user=self.user, 
+            name='Pepper'
+        )
+        payload = {'name': 'Pepper'}
+        url = detail_url(recipe.id)
+        res = self.client.patch(url, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(ingredient2, recipe.ingredients.all())
+        self.assertNotIn(ingredient1, recipe.ingredients.all())
