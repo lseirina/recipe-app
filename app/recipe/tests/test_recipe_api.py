@@ -1,7 +1,11 @@
 """
 Tests for recipe API
 """
+import os
+import tempfile
 from decimal import Decimal
+
+from 
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -23,6 +27,11 @@ from recipe.serializers import (
 
 
 RECIPES_URL = reverse('recipe:recipe-list')
+
+
+def image_url(recipe_id):
+    """Create and return image url."""
+    return reverse('recipe:recipe-upload-image')
 
 
 def detail_url(recipe_id):
