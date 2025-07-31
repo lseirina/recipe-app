@@ -357,3 +357,19 @@ class ImageUploadTest(TestCase):
 
     def tearDown(self):
         self.recipe.image.delet()
+        
+    def test_upload_image(self):
+        """Test uploadin image to recipe."""
+        url = image_url(self.recipe.id)
+        with tempfile.NamedTemporaryFile(prefix='jpg') as imagefile:
+            img = image.new('RGB', (10, 10))
+            img.save(imagefile, format='JPEG')
+            imagefile.seek[0]
+            payload = {'image': imagefile}
+            res = self.client.post(url, payload, format='multipart')
+            
+        self.recipe.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertIn('image', res.data)
+        self.assertTrue(os.path.exists(self.recipe.image.path))
+        
