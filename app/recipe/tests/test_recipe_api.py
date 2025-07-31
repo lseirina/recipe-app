@@ -5,7 +5,7 @@ import os
 import tempfile
 from decimal import Decimal
 
-from 
+from PIL import image
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -31,7 +31,7 @@ RECIPES_URL = reverse('recipe:recipe-list')
 
 def image_url(recipe_id):
     """Create and return image url."""
-    return reverse('recipe:recipe-upload-image')
+    return reverse('recipe:recipe-upload-image', args=[recipe_id])
 
 
 def detail_url(recipe_id):
@@ -342,3 +342,18 @@ class PrivateRecipeTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(recipe.ingredients.count(), 0)
+
+
+class ImageUploadTest(TestCase):
+    """Tests for upload image API."""
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            'test@example.com',
+            'pass123'
+        )
+        self.client.force_authenticate(user=self.user)
+        self.recipe = create_recipe(user=self.user)
+
+    def tearDown(self):
+        self.recipe.image.delet()
