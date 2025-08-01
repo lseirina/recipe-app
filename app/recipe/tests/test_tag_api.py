@@ -110,7 +110,6 @@ class PrivateTagsTests(TestCase):
             time_minutes=39,
             price=Decimal('45.56')
         )
-
         r1.tags.add(tag1)
 
         res = self.client.get(TAGS_URL, {'assigned_only': 1})
@@ -120,3 +119,27 @@ class PrivateTagsTests(TestCase):
         self.assertequal(res.status_code, status.HTTP_200_OK)
         self.assertIn(s1.data, res.data)
         self.assertNotIn(s2.data. res.data)
+
+    def test_filter_tags_unique(self):
+        """Test filtering tags unique assigned to a few recipes."""
+        tag = Tag.objects.create(user=self.user, name='Lunch')
+        Tag.objects.create(user=self.user, name='Dinner')
+        r1 = Recipe.objects.create(
+            user=self.user,
+            title='Soup',
+            time_minutes=39,
+            price=Decimal('45.56')
+        )
+        r2 = Recipe.objects.create(
+            user=self.user,
+            title='Pie',
+            time_minutes=39,
+            price=Decimal('45.56')
+        )
+        r1.tags.add(tag)
+        r2.tags.add(tag)
+
+        res = self.client.get(TAGS_URL, {'assigned_only': 1})
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data), 1)
