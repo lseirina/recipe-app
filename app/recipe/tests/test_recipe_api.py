@@ -344,7 +344,7 @@ class PrivateRecipeTests(TestCase):
         self.assertEqual(recipe.ingredients.count(), 0)
 
     def test_filter_by_tags(self):
-        """Test filtering by tags"""
+        """Test filtering recipes by tags"""
         r1 = create_recipe(user=self.user, title='Pie')
         r2 = create_recipe(user=self.user, title='Cookie')
         tag1 = Tag.objects.create(user=self.user, namae='Dessert')
@@ -359,6 +359,27 @@ class PrivateRecipeTests(TestCase):
         s2 = RecipeSerializer(r2)
         s3 = RecipeSerializer(r3)
         self.assertequal(res.status_code, status.HTTP_200_OK)
+        self.assertIn(s1.data, res.data)
+        self.assertIn(s2.data, res.data)
+        self.assertNotIn(s3.data, res.data)
+
+    def test_filter_by_ingredients(self):
+        """Test filtering recipes by ingredients."""
+        r1 = create_recipe(user=self.user, title='Pie')
+        r2 = create_recipe(user=self.user, title='Cookie')
+        ing1 = Ingredient.objects.create(user=self.user, name='Flour')
+        ing2 = Ingredient.objects.create(user=self.user, name='Sugar')
+        r1.ingredients.add(ing1)
+        r2.ingredients.add(ing2)
+        r3 = create_recipe(user=self.user, title='Soup')
+
+        params = {'ingredients': f'{ing1}, {ing2}'}
+        res = self.client.get(RECIPES_URL, params)
+        s1 = RecipeSerializer(r1)
+        s2 = RecipeSerializer(r2)
+        s3 = RecipeSerializer(r3)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn(s1.data, res.data)
         self.assertIn(s2.data, res.data)
         self.assertNotIn(s3.data, res.data)
