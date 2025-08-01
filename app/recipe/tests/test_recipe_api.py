@@ -5,7 +5,7 @@ import os
 import tempfile
 from decimal import Decimal
 
-from PIL import image
+from PIL import Image
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -343,6 +343,26 @@ class PrivateRecipeTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(recipe.ingredients.count(), 0)
 
+    def test_filter_by_tags(self):
+        """Test filtering by tags"""
+        r1 = create_recipe(user=self.user, title='Pie')
+        r2 = create_recipe(user=self.user, title='Cookie')
+        tag1 = Tag.objects.create(user=self.user, namae='Dessert')
+        tag2 = Tag.objects.create(user=self.user, name='Sweets')
+        r1.tags.add(tag1)
+        r2.tags.add(tag2)
+        r3 = create_recipe(user=self.user, name='Porige')
+
+        params = {'tags': f'{tag1}, {tag2}'}
+        res = self.client.get(RECIPES_URL, params)
+        s1 = RecipeSerializer(r1)
+        s2 = RecipeSerializer(r2)
+        s3 = RecipeSerializer(r3)
+        self.assertequal(res.status_code, status.HTTP_200_OK)
+        self.assertIn(s1.data, res.data)
+        self.assertIn(s2.data, res.data)
+        self.assertNotIn(s3.data, res.data)
+
 
 class ImageUploadTest(TestCase):
     """Tests for upload image API."""
@@ -356,20 +376,20 @@ class ImageUploadTest(TestCase):
         self.recipe = create_recipe(user=self.user)
 
     def tearDown(self):
-        self.recipe.image.delet()
-        
+        self.recipe.image.delete()
+
     def test_upload_image(self):
-        """Test uploadin image to recipe."""
+        """Test uploading an image to a recipe."""
         url = image_url(self.recipe.id)
-        with tempfile.NamedTemporaryFile(prefix='jpg') as imagefile:
-            img = image.new('RGB', (10, 10))
-            img.save(imagefile, format='JPEG')
-            imagefile.seek[0]
-            payload = {'image': imagefile}
+        with tempfile.NamedTemporaryFile(suffix='.jpg') as image_file:
+            img = Image.new('RGB', (10, 10))
+            img.save(image_file, format='JPEG')
+            image_file.seek(0)
+            payload = {'image': image_file}
             res = self.client.post(url, payload, format='multipart')
 
         self.recipe.refresh_from_db()
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn('image', res.data)
         self.assertTrue(os.path.exists(self.recipe.image.path))
 
