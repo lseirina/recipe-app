@@ -347,18 +347,18 @@ class PrivateRecipeTests(TestCase):
         """Test filtering recipes by tags"""
         r1 = create_recipe(user=self.user, title='Pie')
         r2 = create_recipe(user=self.user, title='Cookie')
-        tag1 = Tag.objects.create(user=self.user, namae='Dessert')
+        tag1 = Tag.objects.create(user=self.user, name='Dessert')
         tag2 = Tag.objects.create(user=self.user, name='Sweets')
         r1.tags.add(tag1)
         r2.tags.add(tag2)
-        r3 = create_recipe(user=self.user, name='Porige')
+        r3 = create_recipe(user=self.user, title='Porige')
 
-        params = {'tags': f'{tag1}, {tag2}'}
+        params = {'tags': f'{tag1.id}, {tag2.id}'}
         res = self.client.get(RECIPES_URL, params)
         s1 = RecipeSerializer(r1)
         s2 = RecipeSerializer(r2)
         s3 = RecipeSerializer(r3)
-        self.assertequal(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn(s1.data, res.data)
         self.assertIn(s2.data, res.data)
         self.assertNotIn(s3.data, res.data)
@@ -373,7 +373,7 @@ class PrivateRecipeTests(TestCase):
         r2.ingredients.add(ing2)
         r3 = create_recipe(user=self.user, title='Soup')
 
-        params = {'ingredients': f'{ing1}, {ing2}'}
+        params = {'ingredients': f'{ing1.id}, {ing2.id}'}
         res = self.client.get(RECIPES_URL, params)
         s1 = RecipeSerializer(r1)
         s2 = RecipeSerializer(r2)
