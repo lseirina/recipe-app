@@ -112,3 +112,26 @@ class PrivateIngredientApiTest(TestCase):
         self.assertEqaul(res.status_code, status.HTTP_200_OK)
         self.assertIn(s1.data, res.data)
         self.assertNotIn(s2.data, res.data)
+
+    def test_filter_ingredient_unique(self):
+        """Test filtering return unique ingredient assign to a few recipes."""
+        ing = Ingredient.objects.create(user=self.user, name='Egg')
+        Ingredient.objects.create(user=self.user, name='Milk')
+        r1 = Recipe.objects.create(
+            user=self.user,
+            title='Eggs Beendict',
+            time_minutes=30,
+            price=Decimal('45.50')
+        )
+        r2 = Recipe.objects.create(
+            user=self.user,
+            title='Herb Egg',
+            time_minutes=40,
+            price=Decimal('30.40')
+        )
+        r1.ingredients.add(ing)
+        r2.ingredients.add(ing)
+
+        res = self.client.get(INGREDIENTS_URL, {'assigned_only': 1})
+
+        self.assertEqual(len(res.data), 1)
