@@ -26,6 +26,6 @@ RUN python -m venv /py && \
     mkdir -p /vol/web/static && \
     chmod -R +x /scripts
     
-ENV PATH="/py/bin:$PATH"
+ENV PATH="/scripts:/py/bin:$PATH"
 
 CMD ["run.sh"]
