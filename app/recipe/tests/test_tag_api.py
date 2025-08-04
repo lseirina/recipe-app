@@ -116,9 +116,9 @@ class PrivateTagsTests(TestCase):
         s1 = TagSerializer(tag1)
         s2 = TagSerializer(tag2)
 
-        self.assertequal(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn(s1.data, res.data)
-        self.assertNotIn(s2.data. res.data)
+        self.assertNotIn(s2.data, res.data)
 
     def test_filter_tags_unique(self):
         """Test filtering tags unique assigned to a few recipes."""

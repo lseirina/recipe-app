@@ -109,7 +109,7 @@ class PrivateIngredientApiTest(TestCase):
         s1 = IngredientSerializer(ing1)
         s2 = IngredientSerializer(ing2)
 
-        self.assertEqaul(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn(s1.data, res.data)
         self.assertNotIn(s2.data, res.data)
 
@@ -133,5 +133,4 @@ class PrivateIngredientApiTest(TestCase):
         r2.ingredients.add(ing)
 
         res = self.client.get(INGREDIENTS_URL, {'assigned_only': 1})
-
         self.assertEqual(len(res.data), 1)
